@@ -1,0 +1,52 @@
+# Docker Compose override para desarrollo
+version: '3.8'
+
+services:
+  # Configuraciones específicas para desarrollo
+  
+  # Volcado de logs más verboso para arcturus
+  arcturus:
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=debug
+    volumes:
+      - ./logs/arcturus:/app/logs
+  
+  # Nitro con hot reload para desarrollo
+  nitro:
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./logs/nitro:/var/log/nginx
+  
+  # Assets con logging habilitado
+  assets:
+    volumes:
+      - ./logs/assets:/var/log/nginx
+  
+  # Base de datos con logging habilitado
+  db:
+    environment:
+      - MYSQL_GENERAL_LOG=1
+      - MYSQL_GENERAL_LOG_FILE=/var/log/mysql/general.log
+    volumes:
+      - ./logs/mysql:/var/log/mysql
+  
+  # CMS con debug habilitado
+  cms:
+    environment:
+      - APP_DEBUG=true
+      - LOG_LEVEL=debug
+    volumes:
+      - ./logs/cms:/var/www/html/storage/logs
+
+  # Servicio de desarrollo para logs centralizados
+  log-viewer:
+    image: amir20/dozzle:latest
+    ports:
+      - "9999:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOZZLE_LEVEL=debug
+    networks: [nitro]

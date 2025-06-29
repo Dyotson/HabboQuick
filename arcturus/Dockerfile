@@ -36,23 +36,23 @@ RUN mvn install
 RUN cp target/Morningstar*-with-dependencies.jar target/emulator.jar
 
 
-WORKDIR /build/apollyon
-RUN git clone --recurse-submodules https://git.gurkengewuerz.de/nitro/apollyon-ms4.git .
-RUN sed -i 's#<version>4.0-DEVPREVIEW</version>#<version>[1.0.0,)</version>#g' pom.xml
-RUN mvn package
-RUN cp target/Apollyon-*.jar target/apollyon.jar
+# WORKDIR /build/apollyon
+# RUN git clone --recurse-submodules https://git.gurkengewuerz.de/nitro/apollyon-ms4.git .
+# RUN sed -i 's#<version>4.0-DEVPREVIEW</version>#<version>[1.0.0,)</version>#g' pom.xml
+# RUN mvn package
+# RUN cp target/Apollyon-*.jar target/apollyon.jar
 
 
 
-FROM amazoncorretto:19-alpine
+FROM amazoncorretto:19
 
 WORKDIR /app
 
-RUN apk add --no-cache mariadb-client bash
+RUN yum update -y && yum install -y mariadb bash && yum clean all
 
 COPY --from=builder-ms4 /build/arcturus-community/target/emulator.jar /app/emulator.jar
 RUN mkdir -p /app/plugins
 COPY --from=builder-ms3 /build/arcturus-ws/target/websockets.jar /app/plugins/websockets.jar
-COPY --from=builder-ms4 /build/apollyon/target/apollyon.jar /app/plugins/apollyon.jar
+# COPY --from=builder-ms4 /build/apollyon/target/apollyon.jar /app/plugins/apollyon.jar
 
 ENTRYPOINT ["/usr/bin/java", "-jar", "/app/emulator.jar"]

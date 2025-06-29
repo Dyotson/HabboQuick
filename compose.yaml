@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ============================================================================
   # SERVICIOS DE INICIALIZACIÓN (se ejecutan una sola vez)

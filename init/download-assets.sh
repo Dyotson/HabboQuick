@@ -22,6 +22,10 @@ fi
 
 if [ ! -d "/assets/assets/.git" ]; then
     echo "📦 Descargando assets por defecto..."
+    # Remover directorio si existe pero no tiene .git
+    if [ -d "/assets/assets" ] && [ ! -d "/assets/assets/.git" ]; then
+        rm -rf /assets/assets
+    fi
     git clone https://github.com/krewsarchive/default-assets.git /assets/assets/
 else
     echo "✅ Assets por defecto ya existen, saltando descarga..."

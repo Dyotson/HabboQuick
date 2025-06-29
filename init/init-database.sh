@@ -29,10 +29,17 @@ if [ "$TABLES_COUNT" -lt 10 ]; then
         mysql -h"$DB_HOSTNAME" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" < /sql/catalog_2022.sql
     fi
     
-    # Importar permisos
+    # Importar permisos (verificar si la tabla existe primero)
     if [ -f "/sql/perms_groups.sql" ]; then
         echo "📊 Importando permisos..."
-        mysql -h"$DB_HOSTNAME" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" < /sql/perms_groups.sql
+        # Verificar si las tablas necesarias existen
+        TABLE_EXISTS=$(mysql -h"$DB_HOSTNAME" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" -e "SHOW TABLES LIKE 'permission_group_commands';" 2>/dev/null | wc -l)
+        
+        if [ "$TABLE_EXISTS" -gt 0 ]; then
+            mysql -h"$DB_HOSTNAME" -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE" < /sql/perms_groups.sql
+        else
+            echo "⚠️  Tabla 'permission_group_commands' no existe, saltando importación de permisos..."
+        fi
     fi
     
     # Ejecutar script de permisos Python si existe

@@ -1,22 +1,214 @@
+# ============================================================================
+# HABBO QUICK - GITIGNORE COMPLETO
+# ============================================================================
+
+# ============================================================================
+# ARCHIVOS DE CONFIGURACIÓN GENERADOS AUTOMÁTICAMENTE
+# ============================================================================
+# Archivos .env (contienen secretos y configuraciones locales)
+*.env
+!example-*.env
+
+# Archivos de configuración de Nitro generados automáticamente
+nitro/*.json
+!nitro/example-*.json
+
+# ============================================================================
+# DATOS Y BACKUPS DE BASE DE DATOS
+# ============================================================================
+# Datos persistentes de MySQL (generados automáticamente)
+db/data/
+db/dumps/
+db/backup/
+db/logs/
+
+# Mantener estructura pero ignorar contenido
 db/*
 !db/.gitkeep
-assets/assets
+!db/conf.d/
+
+# Backups generados por make backup-db
+backups/
+*.sql
+!arcturus/*.sql
+
+# ============================================================================
+# ASSETS DESCARGADOS AUTOMÁTICAMENTE
+# ============================================================================
+# Assets descargados por habbo-downloader y git clone
+assets/assets/
+assets/swf/
+
+# Assets generados por traducciones
 assets/translation/gamedata/
 assets/translation/*.sql
 !assets/translation/update_crackable.sql
 !assets/translation/fix_room_items.sql
 !assets/translation/fix_song_disks.sql
-assets/swf
+
+# User content (avatares, cámara, badges)
 assets/usercontent/**/*.png
-~$*.xlsx
-export/
+assets/usercontent/**/*.jpg
+assets/usercontent/**/*.jpeg
+assets/usercontent/**/*.gif
 assets/usercontent/imageproxy/
+assets/usercontent/cache/
+
+# Assets convertidos y cache
+assets/bundled/
+assets/cache/
+
+# ============================================================================
+# CMS Y LOGS
+# ============================================================================
+# AtomCMS archivos generados
 atomcms/cache/*
 atomcms/storage/*
 atomcms/logs/*
 !atomcms/cache/.gitkeep
 !atomcms/storage/.gitkeep
 !atomcms/logs/.gitkeep
-*.env
-nitro/*.json
+
+# Logs de desarrollo y producción
+logs/
+*.log
+
+# ============================================================================
+# ARCHIVOS TEMPORALES Y DE EXPORTACIÓN
+# ============================================================================
+# Archivos temporales de Excel
+~$*.xlsx
+
+# Exportaciones de contenedores
+export/
+*.tar
+
+# Archivos temporales
+tmp/
+temp/
+.tmp/
+
+# ============================================================================
+# ARCHIVOS DEL SISTEMA OPERATIVO
+# ============================================================================
+# MacOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE_BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# ============================================================================
+# IDEs Y EDITORES
+# ============================================================================
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+
+# Emacs
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ============================================================================
+# DEPENDENCIAS Y BUILD ARTIFACTS
+# ============================================================================
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+
+# PHP/Laravel
+vendor/
+.env.backup
+.phpunit.result.cache
+
+# Java/Maven
+target/
+*.jar
+!arcturus/*.jar
+
+# ============================================================================
+# DOCKER Y CONTENEDORES
+# ============================================================================
+# Volúmenes de Docker
+docker-volumes/
+
+# Override files personalizados
+docker-compose.override.yml
+compose.local.yaml
+
+# ============================================================================
+# CERTIFICADOS Y SEGURIDAD
+# ============================================================================
+# Certificados SSL
+*.pem
+*.key
+*.crt
+*.csr
+
+# Claves privadas
+private/
+secrets/
+
+# ============================================================================
+# MANTENER ARCHIVOS IMPORTANTES
+# ============================================================================
+# Mantener archivos de ejemplo
 !example-*
+
+# Mantener .gitkeep para estructura de directorios
+!**/.gitkeep

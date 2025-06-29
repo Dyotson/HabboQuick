@@ -12,6 +12,8 @@ docker compose up
 
 ¡Eso es todo! Con un solo comando tendrás todo el servidor de Habbo funcionando completamente automatizado.
 
+> **💡 Nota importante**: Este proyecto está configurado para que **ningún archivo generado automáticamente** se suba al repositorio. Todo se descarga y configura localmente en tu máquina, manteniendo el repositorio limpio.
+
 ### Instalación Alternativa con Make
 
 ```bash
@@ -172,3 +174,115 @@ Una vez que todo esté funcionando, podrás:
 - **Backups automáticos** programados
 - **Monitoreo de servicios** integrado
 - **Configuración zero-touch** - sin intervención manual
+
+## 📁 Estructura del Proyecto y Archivos Ignorados
+
+Este proyecto está cuidadosamente configurado para mantener el repositorio **completamente limpio** de archivos generados automáticamente. Todo el contenido descargado, configuraciones generadas y datos persistentes se mantienen **solo localmente**.
+
+### 🚫 Archivos que NUNCA se suben al repositorio (en .gitignore)
+
+```text
+# Configuraciones locales generadas automáticamente
+.env                     # Variables de entorno locales  
+.cms.env                 # Configuración específica del CMS
+nitro/*.json             # Configuraciones de Nitro generadas
+
+# Assets descargados automáticamente (varios GB)
+assets/swf/              # SWF pack de Habbo.com
+assets/assets/           # Assets por defecto del juego
+assets/usercontent/      # Contenido generado por usuarios
+assets/cache/            # Cache de assets convertidos
+assets/bundled/          # Assets empaquetados
+
+# Datos de base de datos (persistentes)
+db/data/                 # Datos de MySQL
+db/dumps/                # Dumps de base de datos
+db/backup/               # Backups automáticos
+
+# Logs y archivos temporales
+logs/                    # Logs de todos los servicios
+atomcms/logs/            # Logs específicos del CMS
+atomcms/storage/         # Datos persistentes del CMS
+atomcms/cache/           # Cache del CMS
+*.log                    # Archivos de log individuales
+
+# Backups y exportaciones
+backups/                 # Backups de base de datos
+export/                  # Exportaciones de contenedores
+*.tar                    # Archivos de backup
+
+# Archivos temporales del sistema
+tmp/, temp/, .tmp/       # Directorios temporales
+.DS_Store, Thumbs.db     # Archivos del sistema operativo
+```
+
+### ✅ Archivos importantes del repositorio (versionados)
+
+```text
+# Configuración principal de Docker
+compose.yaml             # Configuración principal de Docker Compose
+compose.dev.yaml         # Override para desarrollo con logs
+compose.traefik.yaml     # Configuración con Traefik para producción
+
+# Scripts de automatización
+Makefile                 # Comandos útiles para el proyecto
+setup.sh                 # Script principal de configuración
+verify-gitignore.sh      # Verificación de que .gitignore funciona
+
+# Plantillas y ejemplos
+example-*.env            # Plantillas de configuración
+nitro/example-*.json     # Plantillas de configuración de Nitro
+
+# Scripts de inicialización
+init/                    # Scripts de inicialización de servicios
+├── download-assets.sh   # Descarga automática de assets
+├── init-database.sh     # Inicialización de base de datos
+├── monitor-services.sh  # Monitoreo de servicios
+└── Dockerfile          # Contenedor de inicialización
+
+# Configuración de servicios
+arcturus/               # Configuración del emulador
+├── Dockerfile         # Imagen del emulador
+├── *.sql             # Scripts SQL del emulador
+└── patches/          # Parches y hotfixes
+
+atomcms/               # Configuración del CMS
+├── Dockerfile        # Imagen del CMS
+└── .gitkeep files    # Mantener estructura de directorios
+
+nitro/                 # Configuración del cliente
+├── Dockerfile        # Imagen del cliente
+├── nginx.conf        # Configuración de nginx
+└── example-*.json    # Plantillas de configuración
+
+assets/                # Configuración del servidor de assets
+├── Dockerfile        # Imagen del servidor de assets
+├── nginx/           # Configuración de nginx
+└── translation/     # Scripts de traducción y conversión
+```
+
+### 🧹 Comandos para mantener el repositorio limpio
+
+```bash
+# Verificar que .gitignore funciona correctamente
+make check-gitignore
+
+# Limpiar todos los archivos generados automáticamente
+make clean-generated
+
+# Ver estado del repositorio después de limpiar
+make git-status
+
+# Verificar completamente la limpieza del repositorio
+make verify-repo-clean
+```
+
+### 🔍 ¿Por qué este enfoque?
+
+1. **Repositorio liviano**: Sin assets pesados ni datos generados
+2. **Colaboración limpia**: Solo código fuente y configuración versionados
+3. **Setup consistente**: Cada desarrollador descarga assets frescos
+4. **Sin conflictos**: No hay archivos generados que causen merge conflicts
+5. **Actualizaciones automáticas**: Assets siempre actualizados de fuentes oficiales
+
+El proyecto está diseñado para que puedas hacer `git clone` + `docker compose up` y tener todo funcionando automáticamente, sin contaminar nunca el repositorio con archivos generados.

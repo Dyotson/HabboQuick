@@ -69,6 +69,20 @@ clean-data: ## ⚠️ CUIDADO: Limpiar TODOS los datos (base de datos incluida)
 	@sudo rm -rf db/data assets/swf assets/assets atomcms/storage atomcms/logs
 	@echo "🗑️ Todos los datos han sido eliminados"
 
+clean-generated: ## Limpiar todos los archivos generados automáticamente
+	@echo "🧹 Limpiando archivos generados automáticamente..."
+	@echo "📁 Eliminando assets descargados..."
+	@rm -rf assets/swf assets/assets assets/usercontent/avatar/* assets/usercontent/camera/* assets/usercontent/badgeparts/generated/*
+	@echo "📁 Eliminando datos de base de datos..."
+	@rm -rf db/data/* db/dumps/* db/backup/*
+	@echo "📁 Eliminando logs..."
+	@rm -rf logs/* atomcms/logs/* *.log
+	@echo "📁 Eliminando backups..."
+	@rm -rf backups/*
+	@echo "📁 Eliminando archivos de configuración generados..."
+	@rm -f .env .cms.env nitro/renderer-config.json nitro/ui-config.json
+	@echo "✅ Archivos generados eliminados. El repositorio está limpio."
+
 status: ## Ver estado de los servicios
 	@docker compose -f $(COMPOSE_FILE) ps
 
@@ -155,3 +169,19 @@ dev-logs: ## Ver logs de desarrollo centralizados
 dev-stop: ## Parar servicios de desarrollo
 	@echo "🛑 Parando servicios de desarrollo..."
 	@docker compose -f compose.yaml -f compose.dev.yaml down
+
+git-status: ## Verificar estado de git después de limpiar
+	@echo "📊 Estado de git después de ejecutar setup:"
+	@git status --porcelain | head -20
+	@echo ""
+	@echo "💡 Tip: Ejecuta 'make clean-generated' para limpiar archivos generados"
+
+check-gitignore: ## Verificar que gitignore funciona correctamente
+	@chmod +x verify-gitignore.sh
+	@./verify-gitignore.sh
+
+verify-repo-clean: ## Verificar que el repositorio está limpio después del setup
+	@echo "🔍 Verificando limpieza del repositorio..."
+	@echo "📊 Ejecutando setup y verificando archivos generados..."
+	@make clean-generated > /dev/null 2>&1 || true
+	@./verify-gitignore.sh

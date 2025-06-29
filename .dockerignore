@@ -1,0 +1,140 @@
+# ============================================================================
+# HABBO QUICK - DOCKERIGNORE
+# ============================================================================
+
+# ============================================================================
+# ARCHIVOS Y DIRECTORIOS A EXCLUIR DE BUILDS DE DOCKER
+# ============================================================================
+
+# Git
+.git/
+.gitignore
+.gitkeep
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+compose*.yaml
+.dockerignore
+
+# Documentation
+README.md
+docs/
+*.md
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# ============================================================================
+# DATOS GENERADOS (no necesarios para builds)
+# ============================================================================
+
+# Base de datos
+db/data/
+db/dumps/
+db/backup/
+db/logs/
+
+# Assets descargados (se descargan en runtime)
+assets/assets/
+assets/swf/
+assets/usercontent/
+assets/cache/
+assets/bundled/
+
+# Logs
+logs/
+*.log
+atomcms/logs/
+
+# Backups
+backups/
+export/
+*.tar
+
+# ============================================================================
+# ARCHIVOS TEMPORALES
+# ============================================================================
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+*~
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# ============================================================================
+# IDE Y EDITOR
+# ============================================================================
+
+# Visual Studio Code
+.vscode/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+
+# ============================================================================
+# DEPENDENCIAS (se instalan en Dockerfile)
+# ============================================================================
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# PHP
+vendor/
+
+# ============================================================================
+# ARCHIVOS DE CONFIGURACIÓN LOCALES
+# ============================================================================
+
+# Environment files (se montan como volúmenes)
+.env*
+!example-*.env
+
+# Local configurations
+local-config/
+custom-configs/
+
+# Certificates (se montan como volúmenes si es necesario)
+*.pem
+*.key
+*.crt
+*.csr
+
+# ============================================================================
+# SCRIPTS DE DESARROLLO
+# ============================================================================
+
+# Test files
+test-integration.sh
+monitor-services.sh
+
+# Makefile (no necesario en containers)
+Makefile

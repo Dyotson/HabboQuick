@@ -161,7 +161,7 @@ services:
     restart: unless-stopped
     depends_on:
       - imgproxy
-      - assets-downloader
+      # - assets-downloader
       - assets-builder
     env_file:
       - .env
@@ -172,7 +172,7 @@ services:
       - ./assets/:/usr/share/nginx/html
     networks: [nitro]
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
+      test: ["CMD", "curl", "-f", "http://localhost/assets/README.md"]
       interval: 30s
       timeout: 10s
       retries: 3

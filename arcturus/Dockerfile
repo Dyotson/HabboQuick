@@ -48,7 +48,7 @@ FROM amazoncorretto:19
 
 WORKDIR /app
 
-RUN yum update -y && yum install -y mariadb bash && yum clean all
+RUN yum update -y && yum install -y mariadb bash nc && yum clean all
 
 COPY --from=builder-ms4 /build/arcturus-community/target/emulator.jar /app/emulator.jar
 RUN mkdir -p /app/plugins

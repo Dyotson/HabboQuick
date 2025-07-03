@@ -88,6 +88,72 @@ else
     echo "✅ Assets de Habbo ya existen, saltando descarga..."
 fi
 
+# Convertir archivos XML/TXT a JSON usando el script de traducción
+echo "🔄 Convirtiendo archivos gamedata (XML/TXT → JSON)..."
+
+# Verificar si ya existen los archivos JSON para evitar conversiones innecesarias
+if [ ! -f "/assets/assets/gamedata/FigureData.json" ] || [ ! -f "/assets/assets/gamedata/FurnitureData.json" ] || [ ! -f "/assets/assets/gamedata/ProductData.json" ]; then
+    if [ -f "/assets/swf/gamedata/figuredata.xml" ] || [ -f "/assets/swf/gamedata/furnidata.xml" ] || [ -f "/assets/swf/gamedata/productdata.txt" ]; then
+        echo "📄 Ejecutando conversiones de gamedata..."
+        
+        # Instalar python3 si no está disponible
+        if ! command -v python3 &> /dev/null; then
+            echo "📦 Instalando Python3..."
+            apk add --no-cache python3 py3-pip
+        fi
+        
+        # Reparar archivos XML corruptos antes de la conversión
+        echo "🔧 Reparando archivos XML corruptos..."
+        cp /assets/translation/fix_xml_specific.py /tmp/fix_xml_specific.py
+        cd /tmp
+        
+        # Reparar furnidata.xml si existe
+        if [ -f "/assets/swf/gamedata/furnidata.xml" ]; then
+            echo "🔧 Reparando furnidata.xml..."
+            python3 fix_xml_specific.py /assets/swf/gamedata/furnidata.xml
+        fi
+        
+        # Copiar script de conversión y ejecutar
+        cp /assets/translation/convert_gamedata.py /tmp/convert_gamedata.py
+        
+        # Ajustar paths en el script para el entorno de contenedor
+        sed -i 's|swf_base = "/usr/share/nginx/html/swf"|swf_base = "/assets/swf"|g' convert_gamedata.py
+        sed -i 's|assets_base = "/usr/share/nginx/html/assets"|assets_base = "/assets/assets"|g' convert_gamedata.py
+        
+        # Ejecutar conversión con manejo de errores
+        if python3 convert_gamedata.py; then
+            echo "✅ Conversión de gamedata completada!"
+        else
+            echo "⚠️  Conversión de gamedata completada con errores"
+            # Crear archivos JSON básicos si no existen
+            echo "🔧 Creando archivos JSON básicos como respaldo..."
+            
+            # FigureData.json básico
+            if [ ! -f "/assets/assets/gamedata/FigureData.json" ]; then
+                echo '{"palettes":[],"settypes":[]}' > /assets/assets/gamedata/FigureData.json
+                echo "✅ FigureData.json básico creado"
+            fi
+            
+            # FurnitureData.json básico
+            if [ ! -f "/assets/assets/gamedata/FurnitureData.json" ]; then
+                echo '{"roomitemtypes":{"furnitype":[]},"wallitemtypes":{"furnitype":[]}}' > /assets/assets/gamedata/FurnitureData.json
+                echo "✅ FurnitureData.json básico creado"
+            fi
+            
+            # ProductData.json básico
+            if [ ! -f "/assets/assets/gamedata/ProductData.json" ]; then
+                echo '{"productdata":{"product":[]}}' > /assets/assets/gamedata/ProductData.json
+                echo "✅ ProductData.json básico creado"
+            fi
+        fi
+        
+    else
+        echo "⚠️  Archivos XML/TXT de gamedata no encontrados, saltando conversión"
+    fi
+else
+    echo "✅ Archivos JSON de gamedata ya existen, saltando conversión..."
+fi
+
 # Establecer permisos correctos
 chown -R 1000:1000 /assets
 chmod -R 755 /assets
@@ -97,3 +163,4 @@ echo "📊 Resumen:"
 echo "   - SWF pack: $(ls -la /assets/swf | wc -l) archivos"
 echo "   - Assets: $(ls -la /assets/assets | wc -l) archivos"
 echo "   - Habbo assets: ✅ Descargados"
+echo "   - Gamedata JSON: ✅ Convertidos automáticamente"

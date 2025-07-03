@@ -185,3 +185,73 @@ verify-repo-clean: ## Verificar que el repositorio está limpio después del set
 	@echo "📊 Ejecutando setup y verificando archivos generados..."
 	@make clean-generated > /dev/null 2>&1 || true
 	@./verify-gitignore.sh
+
+test-db: ## Probar inicialización de base de datos
+	@echo "🧪 Probando inicialización de base de datos..."
+	@chmod +x test_db_init.sh
+	@./test_db_init.sh
+
+fix-db: ## Arreglar problemas de base de datos
+	@echo "🔧 Arreglando problemas de base de datos..."
+	@chmod +x fix_database.sh
+	@./fix_database.sh
+	@echo ""
+	@echo "💡 Para reiniciar el inicializador después de arreglar:"
+	@echo "   docker compose up db-initializer --force-recreate"
+
+fix-db-force: ## Forzar reparación completa de base de datos
+	@echo "🔧 Forzando reparación completa de base de datos..."
+	@echo "🛑 Parando inicializador..."
+	@docker compose stop db-initializer 2>/dev/null || true
+	@echo "🔧 Ejecutando reparación..."
+	@chmod +x fix_database.sh
+	@./fix_database.sh
+	@echo "🚀 Reiniciando inicializador..."
+	@docker compose up db-initializer --force-recreate -d
+	@echo "✅ Reparación completada!"
+
+emergency-fix: ## 🆘 Reparación de emergencia para db-initializer
+	@echo "🆘 Ejecutando reparación de emergencia..."
+	@chmod +x emergency_fix.sh
+	@./emergency_fix.sh
+
+fix-db-sql: ## Ejecutar script SQL de reparación
+	@echo "🔧 Ejecutando script SQL de reparación..."
+	@docker compose exec db mysql -u arcturus_user -p"arcturus_pw" arcturus < fix_database.sql
+	@echo "✅ Script SQL ejecutado!"
+
+reinit-db: ## Reinicializar completamente la base de datos
+	@echo "⚠️ ¿Estás seguro de que quieres reinicializar la base de datos?"
+	@echo "Esto eliminará todos los datos existentes."
+	@read -p "Escribe 'yes' para confirmar: " confirm && [ "$$confirm" = "yes" ]
+	@echo "🗑️ Eliminando datos de base de datos..."
+	@docker compose stop db db-initializer 2>/dev/null || true
+	@docker compose rm -f db db-initializer 2>/dev/null || true
+	@sudo rm -rf db/data/*
+	@echo "🚀 Reiniciando base de datos..."
+	@docker compose up db db-initializer -d
+	@echo "✅ Base de datos reinicializada!"
+
+convert-gamedata: ## Regenerar archivos JSON desde XML/TXT de gamedata
+	@echo "🔄 Regenerando archivos JSON de gamedata..."
+	@echo "📄 Ejecutando conversión de figuredata.xml, furnidata.xml, productdata.txt → JSON..."
+	@docker compose run --rm assets-downloader sh -c "\
+		if [ -f '/assets/translation/convert_gamedata.py' ]; then \
+			echo '📦 Instalando Python3...'; \
+			apk add --no-cache python3 > /dev/null 2>&1; \
+			echo '🔧 Reparando archivos XML corruptos...'; \
+			cp /assets/translation/fix_xml_specific.py /tmp/fix_xml_specific.py; \
+			cd /tmp; \
+			if [ -f '/assets/swf/gamedata/furnidata.xml' ]; then \
+				echo '🔧 Reparando furnidata.xml...'; \
+				python3 fix_xml_specific.py /assets/swf/gamedata/furnidata.xml; \
+			fi; \
+			cp /assets/translation/convert_gamedata.py /tmp/convert_gamedata.py; \
+			sed -i 's|swf_base = \"/usr/share/nginx/html/swf\"|swf_base = \"/assets/swf\"|g' convert_gamedata.py; \
+			sed -i 's|assets_base = \"/usr/share/nginx/html/assets\"|assets_base = \"/assets/assets\"|g' convert_gamedata.py; \
+			python3 convert_gamedata.py; \
+			echo '✅ Conversión completada!'; \
+		else \
+			echo '❌ Script de conversión no encontrado'; \
+		fi"
+	@echo "🎉 Conversión de gamedata completada!"

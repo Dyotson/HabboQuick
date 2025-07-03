@@ -24,6 +24,7 @@ make install
 
 ✅ **Descarga automática de assets**: SWF pack, assets por defecto, room.nitro  
 ✅ **Descarga de assets actualizados**: Usando habbo-downloader con todos los assets de Habbo.com  
+✅ **Conversión automática de gamedata**: XML/TXT → JSON automáticamente (figuredata, furnidata, productdata)  
 ✅ **Inicialización automática de base de datos**: Importa automáticamente todas las tablas necesarias  
 ✅ **Configuración automática**: Todos los settings del emulador y CMS  
 ✅ **Dependencias ordenadas**: Los servicios se inician en el orden correcto automáticamente  
@@ -51,12 +52,40 @@ make logs          # Ver logs en tiempo real
 make clean         # Limpiar todo
 make backup-db     # Hacer backup de la base de datos
 make status        # Ver estado de servicios
+make convert-gamedata  # Regenerar archivos JSON desde XML/TXT
+make test-db       # Verificar base de datos
+make fix-db        # Arreglar problemas de base de datos
+make fix-db-force  # Reparación forzada de base de datos
 ```
+
+## 🔧 Solución de Problemas
+
+### Error db-initializer: "File './arcturus/emulator_settings.MYD' not found"
+
+Este error indica que la tabla `emulator_settings` (MyISAM) está corrupta. **Solución rápida**:
+
+```bash
+# Opción 1: Script de emergencia automático
+./emergency_fix.sh
+
+# Opción 2: Comandos del Makefile
+make fix-db-force
+
+# Opción 3: Manual
+make fix-db
+```
+
+**¿Qué hace la reparación?**
+- ✅ Repara automáticamente tablas MyISAM corruptas
+- ✅ Convierte a InnoDB si es necesario (más estable en Docker)
+- ✅ Aplica todas las configuraciones necesarias
+- ✅ Reinicia el inicializador automáticamente
 
 ## 🔧 Características Automatizadas
 
 - ✅ **Descarga automática de assets**: SWF pack, assets por defecto, room.nitro
 - ✅ **Descarga con habbo-downloader**: Assets actualizados de Habbo.com automáticamente
+- ✅ **Conversión automática de gamedata**: figuredata.xml, furnidata.xml, productdata.txt → JSON automáticamente
 - ✅ **Inicialización automática de base de datos**: Importa automáticamente todas las tablas necesarias
 - ✅ **Configuración automática del emulador**: Todos los emulator_settings configurados automáticamente
 - ✅ **Configuración automática del CMS**: Todos los website_settings configurados automáticamente
@@ -65,6 +94,7 @@ make status        # Ver estado de servicios
 - ✅ **Health checks avanzados**: Verificaciones de salud para asegurar que todo funcione
 - ✅ **Backups automáticos**: Sistema de backup automático de la base de datos
 - ✅ **Conversión de assets**: Usando nitro-converter automáticamente
+- ✅ **Conversión automática de gamedata**: XML/TXT → JSON con reparación automática de XML corrupto
 - ✅ **Monitoreo automático**: Script de verificación de que todos los servicios funcionen
 
 ## 🐳 Arquitectura Docker
@@ -93,7 +123,7 @@ make status        # Ver estado de servicios
 Los assets y la base de datos se descargan e inicializan automáticamente solo la primera vez. En ejecuciones posteriores, el sistema detecta que ya existen y los omite para acelerar el proceso.
 
 ### Servicios de Inicialización (Una sola vez)
-- **assets-downloader**: Descarga SWF pack, assets por defecto y assets de Habbo.com
+- **assets-downloader**: Descarga SWF pack, assets por defecto, assets de Habbo.com y convierte gamedata XML/TXT → JSON
 - **db-initializer**: Configura la base de datos con todas las tablas y configuraciones
 - **assets-builder**: Convierte assets usando nitro-converter
 
@@ -285,4 +315,70 @@ make verify-repo-clean
 4. **Sin conflictos**: No hay archivos generados que causen merge conflicts
 5. **Actualizaciones automáticas**: Assets siempre actualizados de fuentes oficiales
 
-El proyecto está diseñado para que puedas hacer `git clone` + `docker compose up` y tener todo funcionando automáticamente, sin contaminar nunca el repositorio con archivos generados.
+## 🔧 Notas Técnicas Importantes
+
+### Sistema de Permisos
+Los permisos del emulador se generan automáticamente usando un archivo Excel (`perms.xlsx`) que contiene todas las configuraciones de permisos para diferentes rangos. El archivo SQL resultante (`perms_groups.sql`) ya está pre-generado y optimizado.
+
+**Si necesitas regenerar los permisos:**
+1. Modifica el archivo `arcturus/perms.xlsx`
+2. Usa el script alternativo: `python3 perms_sql_openpyxl.py` (usa openpyxl en lugar de pandas)
+3. O usa el script original: `python3 perms_sql.py` (requiere pandas instalado)
+
+### Optimizaciones de Rendimiento
+- **Assets pre-compilados**: Los assets se descargan y procesan una sola vez
+- **Base de datos pre-configurada**: Todas las configuraciones se aplican automáticamente
+- **Contenedores especializados**: Cada servicio tiene su propio contenedor optimizado
+- **Health checks inteligentes**: Verificaciones de salud que aseguran la disponibilidad
+
+## 🔧 Solución de Problemas Avanzada
+
+### Error de Base de Datos (emulator_settings.MYD not found)
+
+Si encuentras el error:
+```
+ERROR 29 (HY000): File './arcturus/emulator_settings.MYD' not found
+```
+
+**Solución rápida:**
+
+```bash
+make fix-db          # Arreglar problemas de base de datos
+make test-db         # Verificar que todo funciona
+```
+
+**¿Qué hace `make fix-db`?**
+- ✅ Reinicia el inicializador de base de datos
+- ✅ Detecta y repara tablas MyISAM corruptas automáticamente
+- ✅ Usa `INSERT ... ON DUPLICATE KEY UPDATE` para configuraciones robustas
+- ✅ Verifica la integridad de tablas críticas
+
+### Error de Archivos JSON Faltantes (FigureData.json, FurnitureData.json, etc.)
+
+Si encuentras errores como:
+```
+GET /assets/gamedata/FigureData.json HTTP/1.1" 404 153
+```
+
+**Solución automática:**
+
+```bash
+make convert-gamedata    # Regenerar archivos JSON desde XML/TXT
+```
+
+**¿Qué hace `make convert-gamedata`?**
+- ✅ Convierte automáticamente `figuredata.xml` → `FigureData.json`
+- ✅ Convierte automáticamente `furnidata.xml` → `FurnitureData.json`  
+- ✅ Convierte automáticamente `productdata.txt` → `ProductData.json`
+- ✅ Se ejecuta automáticamente durante la instalación, pero puedes regenerarlo manualmente
+
+**¿Por qué sucede esto?**
+Los archivos JSON se generan automáticamente desde los archivos XML/TXT descargados de Habbo.com. En ocasiones estos archivos pueden faltar o corromperse.
+
+### Diagnóstico Completo
+
+```bash
+make test-db         # Probar conexión y verificar tablas
+make logs-db         # Ver logs de la base de datos
+make status          # Ver estado de todos los servicios
+```

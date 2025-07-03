@@ -160,7 +160,6 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     depends_on:
-      - imager
       - imgproxy
       - assets-downloader
       - assets-builder
